@@ -13,7 +13,8 @@
 
 # Next.js
 /.next/
-/out/
+# Note: /out/ is the static export directory for Render.com deployment
+# Do not ignore /out/ for production builds
 
 # Production
 /build
