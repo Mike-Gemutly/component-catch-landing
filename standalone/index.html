@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Component Catch - Inspect, Trace, and Modify CSS Across Real Components</title>
+    <meta name="description" content="Jump from any element to its exact source code, extract design tokens, and apply live CSS changes without leaving your browser. Works with React, Vue, Angular, Svelte.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81',
+                            950: '#1e1b4b',
+                        },
+                        success: '#10b981',
+                        accent: '#f59e0b',
+                        background: '#0f172a',
+                        surface: '#1e293b',
+                        border: '#334155',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(to right, #818cf8, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .gradient-cta {
+            background: linear-gradient(to right, #6366f1, #8b5cf6);
+        }
+        
+        .gradient-cta:hover {
+            background: linear-gradient(to right, #4f46e5, #7c3aed);
+        }
+        
+        .feature-card:hover {
+            border-color: #6366f1;
+            transform: scale(1.02);
+        }
+        
+        .glow-badge {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.3);
+        }
+
+        @keyframes subtle-gradient {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.6; }
+        }
+
+        .animated-gradient-bg {
+            animation: subtle-gradient 8s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Navbar -->
+    <nav class="sticky top-0 z-50 border-b border-slate-800 bg-[#0f172a]/95 backdrop-blur-sm">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <div class="w-10 h-10 bg-gradient-to-br from-primary-400 to-primary-600 rounded-lg flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4 16m4 4l4 4-4 4m0 0l0 0" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="text-xl font-bold gradient-text">Component Catch</span>
+                    <span class="ml-2 text-xs bg-accent/20 text-accent px-2 py-0.5 rounded-full">v2.0</span>
+                </div>
+            </div>
+            <div class="hidden md:flex items-center gap-8">
+                <a href="#features" class="text-slate-300 hover:text-white transition-colors">Features</a>
+                <a href="#integrations" class="text-slate-300 hover:text-white transition-colors">Integrations</a>
+                <a href="#pricing" class="text-slate-300 hover:text-white transition-colors">Pricing</a>
+                <a href="#docs" class="text-slate-300 hover:text-white transition-colors">Docs</a>
+            </div>
+            <a href="#" class="gradient-cta text-white px-6 py-2.5 rounded-lg font-semibold transition-all hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/25">
+                Install for Chrome (Free)
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative overflow-hidden pt-32 pb-20">
+        <div class="absolute inset-0 bg-gradient-to-br from-primary-900/40 via-transparent to-accent-900/40 animated-gradient-bg"></div>
+        <div class="relative max-w-7xl mx-auto px-6">
+            <div class="text-center max-w-4xl mx-auto">
+                <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-tight mb-6">
+                    <span class="bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+                        The Missing Link Between AI Coding Agents and Your Browser
+                    </span>
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-300 mb-6 max-w-4xl mx-auto leading-relaxed">
+                    Give your AI agents (Cursor, Claude, Windsurf, Cline) instant live access to DOM, computed styles, framework context, and source code — so they can inspect, trace, suggest, and apply real changes without guesswork. 100% local, no cloud.
+                </p>
+                <div class="flex flex-wrap justify-center gap-3 md:gap-4 mb-10 text-sm md:text-base text-slate-400">
+                    <span class="flex items-center gap-2">
+                        <svg class="w-4 h-4 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                        </svg>
+                        26 MCP Tools
+                    </span>
+                    <span>•</span>
+                    <span>&lt;100ms Latency</span>
+                    <span>•</span>
+                    <span>10–250× Faster Premium</span>
+                    <span>•</span>
+                    <span>100% Local Privacy</span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="#" class="gradient-cta text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105 hover:shadow-2xl hover:shadow-primary-500/25" data-tracking="hero-cta-install">
+                        Install for Chrome (Free)
+                    </a>
+                    <a href="#docs" class="border-2 border-slate-600 hover:border-primary-500 text-slate-300 hover:text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all hover:scale-105" data-tracking="hero-cta-demo">
+                        See It in Action
+                    </a>
+                </div>
+                <p class="text-sm text-slate-500 mt-6 max-w-2xl mx-auto">
+                    MIT Open Source • Runs Entirely on Your Machine • No Tracking
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="py-16 bg-slate-800/30">
+        <div class="max-w-5xl mx-auto px-6">
+            <p class="text-sm text-slate-500 mb-8 text-center uppercase tracking-wider">How Component Catch Fits Into Your Workflow</p>
+            <div class="text-center mb-8 text-xl font-semibold text-white">
+                Browser → Component Catch → AI / Editor
+            </div>
+            <div class="grid md:grid-cols-3 gap-8 text-center">
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">Browser</h3>
+                    <p class="text-slate-400">Inspect live DOM, computed styles, and framework context</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">Component Catch</h3>
+                    <p class="text-slate-400">Persist inspections as structured local sessions (source-aware)</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-bold text-white mb-2">AI / Editor</h3>
+                    <p class="text-slate-400">Claude, Cline, Windsurf, Cursor query sessions to search, modify, and refactor code</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Workflow Section -->
+    <section id="features" class="py-24 bg-slate-900/50">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Four Capabilities, One Bridge</h2>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+                    A local-first system that connects live browser state to AI coding agents and your editor.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 gap-6 md:gap-8">
+                <!-- Translate -->
+                <div class="feature-card bg-slate-800/50 border border-slate-700 p-8 rounded-2xl transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary-400 to-primary-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Translate</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Translate live browser state into structured, source-aware context AI agents can reason about.
+                    </p>
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Framework detection</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Source-aware sessions</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>MCP queryable</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resolve -->
+                <div class="feature-card bg-slate-800/50 border border-slate-700 p-8 rounded-2xl transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-accent to-accent-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Resolve</h3>
+                    <p class="text-slate-400 leading-relaxed mb-2">
+                        Resolve elements to component or file that defines them — with project access configured.
+                    </p>
+                    <p class="text-xs text-slate-500 italic">
+                        Requires local project access
+                    </p>
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Find-in-code</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Open in editor</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>MCP for AI agents</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Execute -->
+                <div class="feature-card bg-slate-800/50 border border-slate-700 p-8 rounded-2xl transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-success to-success-600 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Execute</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Let AI agents and your editor apply changes back to live browser instantly.
+                    </p>
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Live modifications &lt;500ms</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Token export & sync</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Sync with design systems</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>WebSocket bridge</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Local-First Bridge -->
+                <div class="feature-card bg-slate-800/50 border border-slate-700 p-8 rounded-2xl transition-all">
+                    <div class="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-3">Local-First Bridge</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Your data never leaves your machine. Full control, complete privacy.
+                    </p>
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Runs entirely on your machine</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>No accounts or cloud</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Fully auditable MIT code</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>100% privacy & security</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-primary-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                            </svg>
+                            <span>Rust + Go native acceleration</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Specs -->
+    <section id="pricing" class="py-24 bg-slate-800/50 border-t border-slate-700">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold mb-4">Built for AI-to-Browser Workflows</h2>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto">
+                    Verifiable infrastructure for connecting AI agents to real, inspectable frontend state.
+                </p>
+                <p class="text-xs text-slate-600 mt-4 uppercase tracking-wider font-semibold">
+                    26 MCP tools • Go + Rust acceleration • Fully auditable
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="text-center bg-slate-800 border border-slate-700 p-6 rounded-xl">
+                    <svg class="w-8 h-8 text-primary-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7m0 0l4 4m0 0l4 4H4m0 0l4 4m0 0V3l7 7v4m0 0l4 4" />
+                    </svg>
+                    <div class="text-lg font-bold mb-2">Runs Entirely on Your Machine</div>
+                    <div class="text-slate-400">No accounts. No cloud. No tracking.</div>
+                </div>
+                <div class="text-center bg-slate-800 border border-slate-700 p-6 rounded-xl">
+                    <svg class="w-8 h-8 text-success mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                    </svg>
+                    <div class="text-lg font-bold mb-2">Works on React, Vue, Angular, Svelte</div>
+                    <div class="text-slate-400">Universal support across modern frameworks</div>
+                </div>
+                <div class="text-center bg-slate-800 border border-slate-700 p-6 rounded-xl">
+                    <svg class="w-8 h-8 text-success mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 011-18 0 9 9 0 0118 0" />
+                    </svg>
+                    <div class="text-lg font-bold mb-2">Open-Source Core (MIT)</div>
+                    <div class="text-slate-400">Fully auditable codebase. MIT license.</div>
+                </div>
+                <div class="text-center bg-slate-800 border border-slate-700 p-6 rounded-xl">
+                    <svg class="w-8 h-8 text-accent mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7m0 0l4 4m0 0l4 4H4m0 0l4 4m0 0V3l7 7v4m0 0l4 4" />
+                    </svg>
+                    <div class="text-lg font-bold mb-2">Live CSS Updates Without Reload</div>
+                    <div class="text-slate-400">Apply changes instantly via WebSocket bridge. See results &lt;500ms.</div>
+                    <div class="mt-2">
+                        <span class="text-sm text-primary-400 hover:text-primary-300 cursor-pointer underline">Upgrade for 10–250× faster</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Works With Section - Combined -->
+    <section id="integrations" class="py-24 bg-slate-800/30">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <h2 class="text-4xl font-bold mb-6">Seamless with the Tools You Already Use</h2>
+            <p class="text-lg text-slate-400 mb-8 max-w-3xl mx-auto">
+                Works with tools you already use — no new workflow to learn.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Claude</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Cline</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Windsurf</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Cursor</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Warp</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">GitHub Copilot (via MCP)</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">VS Code</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Zed</div>
+                <div class="bg-slate-800 border border-slate-700 px-6 py-3 rounded-xl font-semibold hover:border-primary-500 transition-colors grayscale hover:grayscale-0">Tailwind CSS</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Early Access Section -->
+    <section class="py-24 bg-slate-900 border-t border-slate-700">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-8 text-white">Early Access – Actively Developed for the AI Frontend Era</h2>
+            <p class="text-xl text-slate-300 max-w-2xl mx-auto mb-4">
+                This category is new and evolving fast. We're shipping opinionated defaults that work today while incorporating your feedback to shape v1–v2. Advanced setups require local editor/tool config (MCP).
+            </p>
+            <p class="text-lg text-slate-400 mt-6 max-w-2xl mx-auto bg-slate-800/50 p-6 rounded-xl border border-slate-700">
+                <span class="text-accent font-bold">First 500 installers get priority Discord access + free premium upgrade on v1 release.</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 gradient-cta">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <h2 class="text-4xl md:text-5xl font-bold mb-6 text-white">Give Your AI Agent Real Browser Access Today</h2>
+            <p class="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
+                Install Component Catch to connect Claude, Cline, Windsurf, or Cursor to live frontend state.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="#" class="bg-white text-primary-600 hover:bg-slate-100 px-10 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105" data-tracking="final-cta-install">
+                    Install for Chrome (Free)
+                </a>
+                <a href="#docs" class="border-2 border-white/30 hover:border-white text-white px-10 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105" data-tracking="final-cta-docs">
+                    Read How It Works
+                </a>
+            </div>
+            <p class="text-sm text-primary-200 mt-6 max-w-2xl mx-auto">
+                Setup takes 5–10 minutes – unlock live context for your agents instantly.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-slate-800 bg-slate-900">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-2">
+                    <svg class="w-8 h-8 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4 16m4 4l4 4-4 4m0 0l0 0" />
+                    </svg>
+                    <span class="text-xl font-bold">Component Catch</span>
+                </div>
+                <div class="text-slate-400 text-sm">
+                    © 2025 Component Catch. All rights reserved.
+                </div>
+                <div class="flex gap-6 text-sm">
+                    <a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Terms</a>
+                    <a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">GitHub</a>
+                    <a href="#" class="text-slate-400 hover:text-primary-400 transition-colors">Discord</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
