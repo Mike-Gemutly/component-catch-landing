@@ -1,0 +1,68 @@
+/**
+ * Security-focused ESLint configuration
+ * Prevents accidental introduction of React Server Components patterns
+ *
+ * This configuration detects and blocks patterns that could introduce
+ * vulnerability to CVE-2025-55182, CVE-2025-66478, and related CVEs.
+ */
+
+module.exports = {
+  overrides: [
+    {
+      // Block Server Actions (vulnerable to CVE-2025-66478)
+      files: ['**/*.{ts,tsx,js,jsx}'],
+      rules: {
+        // Prevent 'use server' directive (Server Actions)
+        'no-restricted-syntax': [
+          'error',
+          {
+            selector: "ExpressionStatement > Literal[value='use server']",
+            message: [
+              'Server Actions are not allowed in static export builds.',
+              'They are incompatible with `output: "export"` mode and could introduce',
+              'vulnerability to CVE-2025-66478 (Next.js Server Actions RCE).',
+              '',
+              'If you need server-side functionality, call an external API instead.',
+              'See: https://react.dev/blog/2025/12/03/critical-security-vulnerability-in-react-server-components'
+            ].join('\n')
+          }
+        ]
+      }
+    },
+    {
+      // Block React 19 imports (RSC-only packages)
+      files: ['**/*.{ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            // Block React Server Components packages (React 19+)
+            patterns: [{
+              group: ['react-server', 'react-server-dom-*', 'react-server-native-*'],
+              message: [
+                'React Server Components packages are not allowed.',
+                'They are incompatible with React 18.3.1 and static export mode.',
+                'They could introduce vulnerability to CVE-2025-55182 (React2Shell).',
+                '',
+                'This project uses React 18.3.1 with Next.js 14 static export.',
+                'RSC requires React 19+ and server-side rendering.'
+              ].join('\n')
+            }]
+          }
+        ]
+      }
+    }
+  ],
+
+  // Custom rules to detect Flight protocol usage
+  rules: {
+    // Warn about experimental features that might use Flight protocol
+    'no-restricted-syntax': [
+      'warn',
+      {
+        selector: 'CallExpression[callee.name="flight"]',
+        message: 'Flight protocol usage detected - ensure this is not a security risk'
+      }
+    ]
+  }
+};

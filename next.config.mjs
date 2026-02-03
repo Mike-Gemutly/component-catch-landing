@@ -1,6 +1,5 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   // Static export for Render.com
   output: 'export',
 
@@ -12,9 +11,6 @@ const nextConfig: NextConfig = {
   images: {
     unoptimized: true,
   },
-
-  // Skip build optimization for static export
-  swcMinify: true,
 };
 
 export default nextConfig;
